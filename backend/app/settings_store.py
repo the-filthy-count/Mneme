@@ -25,6 +25,7 @@ def _defaults() -> dict:
         "protomaps_key": "",
         "maptiler_key": "",
         "custom_maps": [],
+        "color_overrides": {},
     }
 
 
@@ -69,6 +70,11 @@ def save(updates: dict) -> dict:
                 for m in updates["custom_maps"]
                 if isinstance(m, dict) and m.get("id") and m.get("label") and m.get("url")
             ]
+        if "color_overrides" in updates and isinstance(updates["color_overrides"], dict):
+            data["color_overrides"] = {
+                k: str(v) for k, v in updates["color_overrides"].items()
+                if isinstance(k, str) and isinstance(v, str) and v.startswith("#")
+            }
         _cfg.settings_file.parent.mkdir(parents=True, exist_ok=True)
         _cfg.settings_file.write_text(json.dumps(data, indent=2))
         return data

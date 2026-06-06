@@ -620,6 +620,14 @@ function CorruptTab() {
 
 // ── Main modal ─────────────────────────────────────────────────────────────
 
+const COLOR_SLOTS = [
+  { key: "water",     label: "Water",        hint: "#4a90d9" },
+  { key: "land",      label: "Land / Parks", hint: "#7cb87a" },
+  { key: "buildings", label: "Buildings",    hint: "#c8b99a" },
+  { key: "roads",     label: "Roads",        hint: "#f0ece6" },
+  { key: "labels",    label: "Labels",       hint: "#333333" },
+];
+
 export default function SettingsModal({
   open,
   initialTab,
@@ -630,6 +638,8 @@ export default function SettingsModal({
   onReset,
   layerVisibility,
   onLayerVisibility,
+  colorOverrides,
+  onColorOverrides,
   people,
   faceScan,
   onPeopleChanged,
@@ -726,7 +736,7 @@ export default function SettingsModal({
     setSaving(true);
     setError(null);
     try {
-      const saved = await saveSettings({ map_style: style, scan_roots: roots, scan_interval_hours: intervalHours, protomaps_key: protomapsKey, maptiler_key: maptilerKey, custom_maps: customMaps });
+      const saved = await saveSettings({ map_style: style, scan_roots: roots, scan_interval_hours: intervalHours, protomaps_key: protomapsKey, maptiler_key: maptilerKey, custom_maps: customMaps, color_overrides: colorOverrides || {} });
       onSaved(saved, rescan);
       onClose();
     } catch (e) {
@@ -875,6 +885,42 @@ export default function SettingsModal({
                       {label}
                     </label>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {mapStyles.find((s) => s.id === style)?.type === "vector" && (
+              <section>
+                <h3>Colors</h3>
+                <p className="muted-sm">Override layer colors on vector styles. Check a slot to enable, then pick a color.</p>
+                <div className="color-overrides-grid">
+                  {COLOR_SLOTS.map(({ key, label, hint }) => {
+                    const active = key in (colorOverrides || {});
+                    return (
+                      <div key={key} className={`color-override-row${active ? " active" : ""}`}>
+                        <label className="color-override-check">
+                          <input
+                            type="checkbox"
+                            checked={active}
+                            onChange={(e) => {
+                              const next = { ...(colorOverrides || {}) };
+                              if (e.target.checked) next[key] = hint;
+                              else delete next[key];
+                              onColorOverrides?.(next);
+                            }}
+                          />
+                        </label>
+                        <span className="color-override-label">{label}</span>
+                        <input
+                          type="color"
+                          className="color-override-swatch"
+                          value={(colorOverrides || {})[key] || hint}
+                          disabled={!active}
+                          onChange={(e) => onColorOverrides?.({ ...(colorOverrides || {}), [key]: e.target.value })}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </section>
             )}

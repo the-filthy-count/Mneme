@@ -491,6 +491,37 @@ body {
 }
 .settings-input:focus { outline: none; border-color: var(--accent-line); }
 
+.color-overrides-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.color-override-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.color-override-row.active { opacity: 1; }
+.color-override-check { display: flex; align-items: center; flex-shrink: 0; }
+.color-override-label { flex: 1; font-size: 13px; }
+.color-override-swatch {
+  width: 36px;
+  height: 26px;
+  padding: 1px 2px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.color-override-swatch:disabled { opacity: 0.35; cursor: default; }
+
 .custom-map-add {
   display: flex;
   gap: 8px;

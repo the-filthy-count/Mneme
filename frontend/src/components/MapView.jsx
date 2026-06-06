@@ -16,6 +16,40 @@ const LAYER_GROUPS = {
   nature:    (id) => id.startsWith("land") || id.startsWith("water") || id.startsWith("natural"),
 };
 
+// Color override groups — finer-grained than LAYER_GROUPS (water/land split).
+const COLOR_GROUPS = {
+  water:     (id) => id.startsWith("water"),
+  land:      (id) => id.startsWith("land") || id.startsWith("natural") || id.includes("park") || id.includes("forest") || id.includes("grass") || id.includes("vegetation") || id.includes("wood"),
+  buildings: (id) => id.startsWith("building"),
+  roads:     (id) => id.startsWith("road") || id.startsWith("path") || id.startsWith("track") || id.startsWith("bridge") || id.startsWith("tunnel"),
+  labels:    (id) => id.includes("label") || id.includes("name") || id.includes("text"),
+};
+
+// Which paint property to update per (group, layer-type) pair.
+const COLOR_PAINT = {
+  water:     { fill: "fill-color", line: "line-color" },
+  land:      { fill: "fill-color" },
+  buildings: { fill: "fill-color", "fill-extrusion": "fill-extrusion-color" },
+  roads:     { line: "line-color" },
+  labels:    { symbol: "text-color" },
+};
+
+function applyColorOverrides(gl, colorOverrides) {
+  if (!colorOverrides || !gl.isStyleLoaded()) return;
+  const layers = gl.getStyle()?.layers ?? [];
+  for (const { id, type } of layers) {
+    for (const [group, test] of Object.entries(COLOR_GROUPS)) {
+      if (!test(id)) continue;
+      const color = colorOverrides[group];
+      if (color) {
+        const prop = COLOR_PAINT[group]?.[type];
+        if (prop) try { gl.setPaintProperty(id, prop, color); } catch {}
+      }
+      break;
+    }
+  }
+}
+
 function clusterIcon(cluster) {
   const img = cluster.cover_id
     ? `<img loading="lazy" src="${thumbUrl(cluster.cover_id)}" alt=""/>`
@@ -32,10 +66,12 @@ function clusterIcon(cluster) {
   });
 }
 
-function BaseLayer({ style, layerVisibility }) {
+function BaseLayer({ style, layerVisibility, colorOverrides }) {
   const map = useMap();
   const layerRef = useRef(null);
   const glRef = useRef(null);
+  const colorOverridesRef = useRef(colorOverrides);
+  useEffect(() => { colorOverridesRef.current = colorOverrides; }, [colorOverrides]);
 
   useEffect(() => {
     if (!style) return;
@@ -58,6 +94,7 @@ function BaseLayer({ style, layerVisibility }) {
         gl?.triggerRepaint?.();
       };
       gl?.once?.("load", refresh);
+      gl?.on?.("styledata", () => applyColorOverrides(gl, colorOverridesRef.current));
       map.on("zoomend", refresh);
       map.on("moveend", refresh);
       const ro = new ResizeObserver(refresh);
@@ -76,6 +113,14 @@ function BaseLayer({ style, layerVisibility }) {
     layerRef.current = layer;
     return () => { cleanup(); map.removeLayer(layer); layerRef.current = null; glRef.current = null; };
   }, [style?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-apply color overrides when they change.
+  useEffect(() => {
+    const gl = glRef.current;
+    if (!gl) return;
+    if (gl.isStyleLoaded()) applyColorOverrides(gl, colorOverrides);
+    else gl.once("styledata", () => applyColorOverrides(gl, colorOverrides));
+  }, [colorOverrides]);
 
   // Apply layer visibility toggles to the GL map whenever they change.
   useEffect(() => {
@@ -141,7 +186,7 @@ function PlacementHandler({ onMapClick }) {
   return null;
 }
 
-export default function MapView({ clusters, onClusterClick, mapStyle, layerVisibility, flyTo, onViewChange, placementMode, onMapClick, pendingPin }) {
+export default function MapView({ clusters, onClusterClick, mapStyle, layerVisibility, colorOverrides, flyTo, onViewChange, placementMode, onMapClick, pendingPin }) {
   const markers = useMemo(
     () =>
       clusters.map((cluster) => {
@@ -179,7 +224,7 @@ export default function MapView({ clusters, onClusterClick, mapStyle, layerVisib
       center={[20, 0]} zoom={3} minZoom={1} maxZoom={19} worldCopyJump
       className={`map${placementMode ? " placement-mode" : ""}`}
     >
-      <BaseLayer style={mapStyle} layerVisibility={layerVisibility} />
+      <BaseLayer style={mapStyle} layerVisibility={layerVisibility} colorOverrides={colorOverrides} />
       {!placementMode && markers}
       {placementMode && onMapClick && <PlacementHandler onMapClick={onMapClick} />}
       {pendingPin && (

@@ -210,6 +210,7 @@ class SettingsOut(BaseModel):
     protomaps_key: str = ""
     maptiler_key: str = ""
     custom_maps: list[CustomMap] = []
+    color_overrides: dict[str, str] = {}
 
 
 class SettingsUpdate(BaseModel):
@@ -219,6 +220,7 @@ class SettingsUpdate(BaseModel):
     protomaps_key: str | None = None
     maptiler_key: str | None = None
     custom_maps: list[CustomMap] | None = None
+    color_overrides: dict[str, str] | None = None
 
 
 class DirEntry(BaseModel):

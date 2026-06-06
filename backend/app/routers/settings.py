@@ -42,6 +42,8 @@ def update_settings(body: SettingsUpdate) -> dict:
         updates["maptiler_key"] = body.maptiler_key
     if body.custom_maps is not None:
         updates["custom_maps"] = [m.model_dump() for m in body.custom_maps]
+    if body.color_overrides is not None:
+        updates["color_overrides"] = body.color_overrides
     if body.scan_roots is not None:
         # Each root must exist, be a directory, and sit under the browse root.
         cleaned: list[str] = []

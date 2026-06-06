@@ -50,6 +50,7 @@ export default function App() {
   const [settingsInitialTab, setSettingsInitialTab] = useState("settings");
   const [flyTo, setFlyTo] = useState(null);
   const [layerVisibility, setLayerVisibility] = useState({});
+  const [colorOverrides, setColorOverrides] = useState({});
   const [dayFilter, setDayFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState(["image", "video", "pano"]);
   const [view, setView] = useState({ zoom: 2, bounds: null });
@@ -111,7 +112,7 @@ export default function App() {
 
   useEffect(() => {
     fetchMapStyles().then(setMapStyles).catch(() => {});
-    fetchSettings().then(setSettings).catch(() => {});
+    fetchSettings().then((s) => { setSettings(s); setColorOverrides(s?.color_overrides || {}); }).catch(() => {});
     loadStats();
     loadUnlocated();
     loadPeople();
@@ -184,6 +185,7 @@ export default function App() {
   const onSettingsSaved = useCallback(
     (saved, rescan) => {
       setSettings(saved);
+      setColorOverrides(saved?.color_overrides || {});
       if (rescan) onScan();
     },
     [onScan]
@@ -407,6 +409,7 @@ export default function App() {
           onClusterClick={placementGroup ? undefined : setActiveCluster}
           mapStyle={currentStyle}
           layerVisibility={layerVisibility}
+          colorOverrides={colorOverrides}
           flyTo={flyTo}
           onViewChange={onViewChange}
           placementMode={!!placementGroup}
@@ -488,6 +491,8 @@ export default function App() {
         onSaved={onSettingsSaved}
         layerVisibility={layerVisibility}
         onLayerVisibility={setLayerVisibility}
+        colorOverrides={colorOverrides}
+        onColorOverrides={setColorOverrides}
         onReset={() => { setScan(null); refreshAll(); }}
         people={people}
         faceScan={faceScan}
