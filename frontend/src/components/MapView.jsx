@@ -16,13 +16,28 @@ const LAYER_GROUPS = {
   nature:    (id) => id.startsWith("land") || id.startsWith("water") || id.startsWith("natural"),
 };
 
-// Color override groups — finer-grained than LAYER_GROUPS (water/land split).
+// Color override groups — matched against both render layer ID and source-layer
+// so they work across VersaTiles (shortbread), MapTiler (OpenMapTiles), and Protomaps schemas.
 const COLOR_GROUPS = {
-  water:     (id) => id.startsWith("water"),
-  land:      (id) => id.startsWith("land") || id.startsWith("natural") || id.includes("park") || id.includes("forest") || id.includes("grass") || id.includes("vegetation") || id.includes("wood"),
-  buildings: (id) => id.startsWith("building"),
-  roads:     (id) => id.startsWith("road") || id.startsWith("path") || id.startsWith("track") || id.startsWith("bridge") || id.startsWith("tunnel"),
-  labels:    (id) => id.includes("label") || id.includes("name") || id.includes("text"),
+  water: ({ id, sl }) =>
+    id.startsWith("water") || sl === "water" || sl === "water_polygon" ||
+    sl === "waterway",
+  land: ({ id, sl }) =>
+    id.startsWith("land") || id.startsWith("natural") ||
+    id.includes("park") || id.includes("forest") || id.includes("grass") ||
+    id.includes("vegetation") || id.includes("wood") || id.includes("earth") ||
+    sl === "landcover" || sl === "landuse" || sl === "earth" ||
+    sl === "globallandcover",
+  buildings: ({ id, sl }) =>
+    id.startsWith("building") || sl === "building" || sl === "buildings",
+  roads: ({ id, sl }) =>
+    id.startsWith("road") || id.startsWith("path") || id.startsWith("track") ||
+    id.startsWith("bridge") || id.startsWith("tunnel") || id.startsWith("roads") ||
+    sl === "transportation" || sl === "road" || sl === "roads",
+  labels: ({ id, sl }) =>
+    id.includes("label") || id.includes("name") || id.includes("text") ||
+    sl === "place" || sl === "places" || sl === "poi" ||
+    sl === "transportation_name" || sl === "water_name" || sl === "roads_labels",
 };
 
 // Which paint property to update per (group, layer-type) pair.
@@ -37,9 +52,12 @@ const COLOR_PAINT = {
 function applyColorOverrides(gl, colorOverrides) {
   if (!colorOverrides || !gl.isStyleLoaded()) return;
   const layers = gl.getStyle()?.layers ?? [];
-  for (const { id, type } of layers) {
+  for (const layer of layers) {
+    const id = layer.id;
+    const sl = layer["source-layer"] ?? "";
+    const type = layer.type;
     for (const [group, test] of Object.entries(COLOR_GROUPS)) {
-      if (!test(id)) continue;
+      if (!test({ id, sl })) continue;
       const color = colorOverrides[group];
       if (color) {
         const prop = COLOR_PAINT[group]?.[type];
