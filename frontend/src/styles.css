@@ -518,7 +518,8 @@ body {
 }
 .color-override-row.active { opacity: 1; }
 .color-override-check { display: flex; align-items: center; flex-shrink: 0; }
-.color-override-label { flex: 1; font-size: 13px; }
+.color-override-label { flex: 1; font-size: 13px; display: flex; flex-direction: column; gap: 1px; }
+.color-override-note { font-size: 10px; color: var(--muted); }
 .color-override-swatch {
   width: 36px;
   height: 26px;

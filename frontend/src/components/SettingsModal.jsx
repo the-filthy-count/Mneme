@@ -621,11 +621,12 @@ function CorruptTab() {
 // ── Main modal ─────────────────────────────────────────────────────────────
 
 const COLOR_SLOTS = [
-  { key: "water",     label: "Water",        hint: "#4a90d9" },
-  { key: "land",      label: "Land / Parks", hint: "#7cb87a" },
-  { key: "buildings", label: "Buildings",    hint: "#c8b99a" },
-  { key: "roads",     label: "Roads",        hint: "#f0ece6" },
-  { key: "labels",    label: "Labels",       hint: "#333333" },
+  { key: "background", label: "Background",   hint: "#0d1b2a", note: "Base layer — ocean in dark/toner styles, land in light styles" },
+  { key: "water",      label: "Water",        hint: "#4a90d9", note: "Lakes, rivers, water bodies" },
+  { key: "land",       label: "Land / Parks", hint: "#7cb87a" },
+  { key: "buildings",  label: "Buildings",    hint: "#c8b99a" },
+  { key: "roads",      label: "Roads",        hint: "#f0ece6" },
+  { key: "labels",     label: "Labels",       hint: "#333333" },
 ];
 
 export default function SettingsModal({
@@ -895,7 +896,7 @@ export default function SettingsModal({
                 <h3>Colors</h3>
                 <p className="muted-sm">Override layer colors on vector styles. Check a slot to enable, then pick a color.</p>
                 <div className="color-overrides-grid">
-                  {COLOR_SLOTS.map(({ key, label, hint }) => {
+                  {COLOR_SLOTS.map(({ key, label, hint, note }) => {
                     const active = key in (colorOverrides || {});
                     return (
                       <div key={key} className={`color-override-row${active ? " active" : ""}`}>
@@ -911,7 +912,10 @@ export default function SettingsModal({
                             }}
                           />
                         </label>
-                        <span className="color-override-label">{label}</span>
+                        <span className="color-override-label">
+                          {label}
+                          {note && <span className="color-override-note">{note}</span>}
+                        </span>
                         <input
                           type="color"
                           className="color-override-swatch"

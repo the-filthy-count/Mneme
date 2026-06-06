@@ -50,12 +50,19 @@ const COLOR_PAINT = {
 };
 
 function applyColorOverrides(gl, colorOverrides) {
-  if (!colorOverrides || !gl.isStyleLoaded()) return;
-  const layers = gl.getStyle()?.layers ?? [];
+  if (!colorOverrides) return;
+  const layers = gl.getStyle()?.layers;
+  if (!layers?.length) return;
   for (const layer of layers) {
     const id = layer.id;
     const sl = layer["source-layer"] ?? "";
     const type = layer.type;
+    // Background layer — handled by its own slot.
+    if (type === "background") {
+      const color = colorOverrides["background"];
+      if (color) try { gl.setPaintProperty(id, "background-color", color); } catch {}
+      continue;
+    }
     for (const [group, test] of Object.entries(COLOR_GROUPS)) {
       if (!test({ id, sl })) continue;
       const color = colorOverrides[group];
@@ -112,7 +119,7 @@ function BaseLayer({ style, layerVisibility, colorOverrides }) {
         gl?.triggerRepaint?.();
       };
       gl?.once?.("load", refresh);
-      gl?.on?.("styledata", () => applyColorOverrides(gl, colorOverridesRef.current));
+      gl?.once?.("idle", () => applyColorOverrides(gl, colorOverridesRef.current));
       map.on("zoomend", refresh);
       map.on("moveend", refresh);
       const ro = new ResizeObserver(refresh);
@@ -137,7 +144,7 @@ function BaseLayer({ style, layerVisibility, colorOverrides }) {
     const gl = glRef.current;
     if (!gl) return;
     if (gl.isStyleLoaded()) applyColorOverrides(gl, colorOverrides);
-    else gl.once("styledata", () => applyColorOverrides(gl, colorOverrides));
+    else gl.once("idle", () => applyColorOverrides(gl, colorOverrides));
   }, [colorOverrides]);
 
   // Apply layer visibility toggles to the GL map whenever they change.
