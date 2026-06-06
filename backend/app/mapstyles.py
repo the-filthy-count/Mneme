@@ -165,10 +165,18 @@ MAPTILER_BASE = "https://api.maptiler.com/maps"
 MAPTILER_THEMES = [
     ("streets-v2",    "Streets"),
     ("openstreetmap", "OpenStreetMap"),
-    ("topo-v2",       "Topo"),
     ("outdoor-v2",    "Outdoor"),
-    ("dataviz",       "Data Viz"),
-    ("basic-v2",      "Basic"),
+    ("topo-v2",       "Topo"),
+    ("dataviz",       "Dataviz"),
+    ("landscape",     "Landscape"),
+    ("aquarelle",     "Aquarelle"),
+    ("backdrop",      "Backdrop"),
+    ("basic-v2",      "Base"),
+    ("ocean",         "Ocean"),
+    ("hybrid",        "Satellite Hybrid"),
+    ("satellite",     "Satellite Plain"),
+    ("toner-v2",      "Toner"),
+    ("winter-v2",     "Winter"),
     ("bright-v2",     "Bright"),
 ]
 MAPTILER_STYLE_IDS = {f"maptiler-{slug}" for slug, _ in MAPTILER_THEMES}

@@ -725,6 +725,13 @@ export default function SettingsModal({
       <div className="settings" onClick={(e) => e.stopPropagation()}>
         <div className="settings-tab-bar">
           <button
+            className="settings-save-tab-btn"
+            onClick={onSave}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button
             className={`settings-tab-btn${activeTab === "about" ? " active" : ""}`}
             onClick={() => setActiveTab("about")}
           >
@@ -775,6 +782,7 @@ export default function SettingsModal({
         <button className="overlay-close" onClick={onClose} aria-label="Close">×</button>
 
         <div className="settings-body">
+        {error && <p className="scan-note error" style={{ marginTop: 0, marginBottom: 12 }}>{error}</p>}
         {activeTab === "about" ? (
           <AboutTab />
         ) : activeTab === "people" ? (
@@ -992,6 +1000,10 @@ export default function SettingsModal({
                     ? "Mneme will automatically scan your library in the background."
                     : "Automatic scanning is disabled. Scan manually to index new files."}
                 </p>
+                <label className="rescan-toggle">
+                  <input type="checkbox" checked={rescan} onChange={(e) => setRescan(e.target.checked)} />
+                  Re-scan after saving
+                </label>
               </div>
             </section>
 
@@ -1008,20 +1020,6 @@ export default function SettingsModal({
               </div>
             </section>
 
-            {error && <p className="scan-note error">{error}</p>}
-
-            <div className="settings-actions">
-              <label className="rescan-toggle">
-                <input type="checkbox" checked={rescan} onChange={(e) => setRescan(e.target.checked)} />
-                Re-scan after saving
-              </label>
-              <div>
-                <button className="mini-btn" onClick={onClose}>Cancel</button>
-                <button className="scan-btn inline" onClick={onSave} disabled={saving}>
-                  {saving ? "Saving…" : "Save"}
-                </button>
-              </div>
-            </div>
           </>
         )}
         </div>

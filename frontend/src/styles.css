@@ -413,6 +413,24 @@ body {
   border-bottom: 1px solid rgba(155,159,212,0.35);
   border-radius: 12px 12px 0 0;
 }
+.settings-save-tab-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-bottom: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px 9px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  align-self: flex-end;
+  margin-right: 6px;
+  transition: background 0.15s;
+  letter-spacing: 0.2px;
+}
+.settings-save-tab-btn:hover { background: rgba(255,255,255,0.28); }
+.settings-save-tab-btn:disabled { opacity: 0.6; cursor: default; }
+
 .settings-tab-btn {
   background: none;
   border: none;
