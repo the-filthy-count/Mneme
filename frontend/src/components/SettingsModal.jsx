@@ -751,13 +751,6 @@ export default function SettingsModal({
       <div className="settings" onClick={(e) => e.stopPropagation()}>
         <div className="settings-tab-bar">
           <button
-            className="settings-save-tab-btn"
-            onClick={onSave}
-            disabled={saving}
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
-          <button
             className={`settings-tab-btn${activeTab === "about" ? " active" : ""}`}
             onClick={() => setActiveTab("about")}
           >
@@ -804,8 +797,16 @@ export default function SettingsModal({
           >
             Settings
           </button>
+          <div className="settings-tab-spacer" />
+          <button
+            className="settings-save-tab-btn"
+            onClick={onSave}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button className="overlay-close" onClick={onClose} aria-label="Close">×</button>
         </div>
-        <button className="overlay-close" onClick={onClose} aria-label="Close">×</button>
 
         <div className="settings-body">
         {error && <p className="scan-note error" style={{ marginTop: 0, marginBottom: 12 }}>{error}</p>}
