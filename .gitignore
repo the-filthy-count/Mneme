@@ -1,0 +1,11 @@
+.env
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.venv/
+data/
+sample-library/*
+!sample-library/.gitkeep
+.DS_Store
+*.zip

@@ -1,0 +1,26 @@
+# Run Mneme from the published image — no source checkout or build needed.
+#
+#   docker compose -f docker-compose.pull.yml up -d
+#
+# Set MNEME_LIBRARY to your photo folder and MNEME_PORT if you like (see
+# .env.example). To update:  docker compose -f docker-compose.pull.yml pull
+services:
+  mneme:
+    image: thefilthycount/mneme:latest
+    restart: unless-stopped
+    environment:
+      MNEME_MEDIA_DIR: /media
+      MNEME_DATA_DIR: /data
+    ports:
+      - "${MNEME_PORT:-6363}:8000"
+    volumes:
+      # Point this at your photo/video library. Read-only: Mneme never writes here.
+      - ${MNEME_LIBRARY:-./sample-library}:/media:ro
+      # Mount extra folders to index, then add them in Settings → Library directories.
+      # - /mnt/photos:/photos:ro
+      # - ${HOME}/Pictures:/pictures:ro
+      # Persistent index + generated thumbnails.
+      - mneme-data:/data
+
+volumes:
+  mneme-data:

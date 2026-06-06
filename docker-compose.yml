@@ -1,0 +1,22 @@
+services:
+  mneme:
+    build: .
+    image: mneme:latest
+    restart: unless-stopped
+    environment:
+      MNEME_MEDIA_DIR: /media
+      MNEME_DATA_DIR: /data
+    ports:
+      - "${MNEME_PORT:-6363}:8000"
+    volumes:
+      # Point this at your photo/video library. Read-only: Mneme never writes here.
+      - ${MNEME_LIBRARY:-./sample-library}:/media:ro
+      # Mount any extra folders you want to index here, then add them from the
+      # Settings → Library directories browser (anything mounted is navigable).
+      # - /mnt/photos:/photos:ro
+      # - ${HOME}/Pictures:/pictures:ro
+      # Persistent index + generated thumbnails.
+      - mneme-data:/data
+
+volumes:
+  mneme-data:
