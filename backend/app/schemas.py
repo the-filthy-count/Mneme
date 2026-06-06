@@ -197,12 +197,19 @@ class MapStyle(BaseModel):
     attribution: str = ""
 
 
+class CustomMap(BaseModel):
+    id: str
+    label: str
+    url: str
+
+
 class SettingsOut(BaseModel):
     map_style: str
     scan_roots: list[str]
     scan_interval_hours: int = 24
     protomaps_key: str = ""
     maptiler_key: str = ""
+    custom_maps: list[CustomMap] = []
 
 
 class SettingsUpdate(BaseModel):
@@ -211,6 +218,7 @@ class SettingsUpdate(BaseModel):
     scan_interval_hours: int | None = None
     protomaps_key: str | None = None
     maptiler_key: str | None = None
+    custom_maps: list[CustomMap] | None = None
 
 
 class DirEntry(BaseModel):

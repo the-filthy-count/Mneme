@@ -19,6 +19,8 @@ def map_styles() -> list[dict]:
         styles = protomaps_styles(cfg["protomaps_key"]) + styles
     if cfg.get("maptiler_key"):
         styles = maptiler_styles(cfg["maptiler_key"]) + styles
+    for cm in reversed(cfg.get("custom_maps", [])):
+        styles = [{"id": cm["id"], "label": cm["label"], "type": "vector", "url": cm["url"], "attribution": ""}] + styles
     return styles
 
 
@@ -38,6 +40,8 @@ def update_settings(body: SettingsUpdate) -> dict:
         updates["protomaps_key"] = body.protomaps_key
     if body.maptiler_key is not None:
         updates["maptiler_key"] = body.maptiler_key
+    if body.custom_maps is not None:
+        updates["custom_maps"] = [m.model_dump() for m in body.custom_maps]
     if body.scan_roots is not None:
         # Each root must exist, be a directory, and sit under the browse root.
         cleaned: list[str] = []

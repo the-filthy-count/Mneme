@@ -24,6 +24,7 @@ def _defaults() -> dict:
         "scan_interval_hours": 24,
         "protomaps_key": "",
         "maptiler_key": "",
+        "custom_maps": [],
     }
 
 
@@ -36,7 +37,8 @@ def load() -> dict:
             except (json.JSONDecodeError, OSError):
                 pass
         # Sanitise.
-        if data.get("map_style") not in STYLE_IDS:
+        custom_ids = {m["id"] for m in data.get("custom_maps", []) if isinstance(m, dict) and "id" in m}
+        if data.get("map_style") not in (STYLE_IDS | custom_ids):
             data["map_style"] = _cfg.default_map_style
         roots = data.get("scan_roots") or [str(_cfg.media_dir)]
         data["scan_roots"] = [str(r) for r in roots]
@@ -61,6 +63,12 @@ def save(updates: dict) -> dict:
             data["protomaps_key"] = str(updates["protomaps_key"] or "")
         if "maptiler_key" in updates:
             data["maptiler_key"] = str(updates["maptiler_key"] or "")
+        if "custom_maps" in updates and isinstance(updates["custom_maps"], list):
+            data["custom_maps"] = [
+                {"id": str(m["id"]), "label": str(m["label"]), "url": str(m["url"])}
+                for m in updates["custom_maps"]
+                if isinstance(m, dict) and m.get("id") and m.get("label") and m.get("url")
+            ]
         _cfg.settings_file.parent.mkdir(parents=True, exist_ok=True)
         _cfg.settings_file.write_text(json.dumps(data, indent=2))
         return data

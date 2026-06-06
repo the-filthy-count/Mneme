@@ -651,6 +651,9 @@ export default function SettingsModal({
   const [intervalHours, setIntervalHours] = useState(settings?.scan_interval_hours ?? 24);
   const [protomapsKey, setProtomapsKey] = useState(settings?.protomaps_key || "");
   const [maptilerKey, setMaptilerKey] = useState(settings?.maptiler_key || "");
+  const [customMaps, setCustomMaps] = useState(settings?.custom_maps || []);
+  const [newMapLabel, setNewMapLabel] = useState("");
+  const [newMapUrl, setNewMapUrl] = useState("");
   const [browser, setBrowser] = useState({ path: null, parent: null, dirs: [] });
   const [manualPath, setManualPath] = useState("");
   const [rescan, setRescan] = useState(true);
@@ -674,6 +677,9 @@ export default function SettingsModal({
       setIntervalHours(settings?.scan_interval_hours ?? 24);
       setProtomapsKey(settings?.protomaps_key || "");
       setMaptilerKey(settings?.maptiler_key || "");
+      setCustomMaps(settings?.custom_maps || []);
+      setNewMapLabel("");
+      setNewMapUrl("");
       fetchDuplicateStats().then((s) => setDupGroupCount(s.groups)).catch(() => {});
       fetchCorruptMedia().then((items) => setCorruptCount(items.length)).catch(() => {});
       setManualPath("");
@@ -706,11 +712,21 @@ export default function SettingsModal({
     }
   };
 
+  const addCustomMap = () => {
+    if (!newMapLabel.trim() || !newMapUrl.trim()) return;
+    const id = "custom-" + Math.random().toString(36).slice(2, 8);
+    setCustomMaps((prev) => [...prev, { id, label: newMapLabel.trim(), url: newMapUrl.trim() }]);
+    setNewMapLabel("");
+    setNewMapUrl("");
+  };
+
+  const removeCustomMap = (id) => setCustomMaps((prev) => prev.filter((m) => m.id !== id));
+
   const onSave = async () => {
     setSaving(true);
     setError(null);
     try {
-      const saved = await saveSettings({ map_style: style, scan_roots: roots, scan_interval_hours: intervalHours, protomaps_key: protomapsKey, maptiler_key: maptilerKey });
+      const saved = await saveSettings({ map_style: style, scan_roots: roots, scan_interval_hours: intervalHours, protomaps_key: protomapsKey, maptiler_key: maptilerKey, custom_maps: customMaps });
       onSaved(saved, rescan);
       onClose();
     } catch (e) {
@@ -891,6 +907,39 @@ export default function SettingsModal({
                   onChange={(e) => setMaptilerKey(e.target.value)}
                 />
               </div>
+            </section>
+
+            <section>
+              <h3>Custom styles</h3>
+              <p className="muted-sm">Add any Mapbox-compatible style URL — MapTiler custom maps, self-hosted styles, etc.</p>
+              <div className="custom-map-add">
+                <input
+                  className="settings-input"
+                  placeholder="Name"
+                  value={newMapLabel}
+                  onChange={(e) => setNewMapLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") addCustomMap(); }}
+                />
+                <input
+                  className="settings-input custom-map-url-input"
+                  placeholder="https://…/style.json?key=…"
+                  value={newMapUrl}
+                  onChange={(e) => setNewMapUrl(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") addCustomMap(); }}
+                />
+                <button className="mini-btn" onClick={addCustomMap}>Add</button>
+              </div>
+              {customMaps.length > 0 && (
+                <ul className="custom-map-list">
+                  {customMaps.map((m) => (
+                    <li key={m.id} className="custom-map-item">
+                      <span className="custom-map-item-label">{m.label}</span>
+                      <span className="custom-map-item-url">{m.url}</span>
+                      <button className="mini-btn" onClick={() => removeCustomMap(m.id)}>Remove</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           </>
         ) : (
